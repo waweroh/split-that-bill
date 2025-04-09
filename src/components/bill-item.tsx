@@ -10,6 +10,7 @@ interface BillItemRowProps {
   onToggleSelection: () => void;
 }
 
+
 export default function BillItemRow({
   item,
   isSelected,
