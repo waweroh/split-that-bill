@@ -1,21 +1,23 @@
 "use client";
 
+import type React from "react";
 import { Copy } from "lucide-react";
 import type { Bill } from "@/types/bill";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface BillSummaryProps {
   bill: Bill;
   userTotals: {
     subtotal: number;
-    tax: number;
-    tip: number;
-    total: number;
+    amountPaid: number;
+    balance: number;
   };
   onSettleBill: () => void;
   message: string;
+  onAmountPaidChange: (amount: number) => void;
 }
 
 export default function BillSummary({
@@ -23,9 +25,15 @@ export default function BillSummary({
   userTotals,
   onSettleBill,
   message,
+  onAmountPaidChange,
 }: BillSummaryProps) {
   const billTotal =
     bill.items.reduce((sum, item) => sum + item.price, 0) + bill.tax + bill.tip;
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number.parseFloat(e.target.value) || 0;
+    onAmountPaidChange(value);
+  };
 
   const copyToClipboard = async () => {
     try {
@@ -34,60 +42,60 @@ export default function BillSummary({
       //   title: "Copied to clipboard",
       //   description: "Your bill breakdown has been copied to clipboard",
       // });
-      toast("Bill copied to clipboard")
+      toast("Bill copied to clipboard");
     } catch (err) {
       // toast({
       //   title: "Failed to copy",
       //   description: "Please try again or copy manually",
       //   variant: "destructive",
       // });
-      toast("Failed to copy")
+      toast("Failed to copy");
     }
   };
 
   return (
     <div className='border-t'>
-      <div className='p-4 space-y-2'>
-        <div className='flex justify-between'>
-          <span>Bill Subtotal:</span>
-          <span>
-            ${bill.items.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
-          </span>
-        </div>
-        <div className='flex justify-between'>
-          <span>Tax:</span>
-          <span>${bill.tax.toFixed(2)}</span>
-        </div>
-        <div className='flex justify-between'>
-          <span>Tip:</span>
-          <span>${bill.tip.toFixed(2)}</span>
-        </div>
-        <div className='flex justify-between font-bold pt-2 border-t'>
+      <div className="p-4">
+        <div className="flex justify-between font-bold">
           <span>Bill Total:</span>
-          <span>${billTotal.toFixed(2)}</span>
+          <span>${bill.items.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</span>
         </div>
       </div>
-
       <div className='bg-muted/20 p-4 space-y-4'>
         <h3 className='font-semibold'>Your Portion</h3>
 
-        <div className='space-y-1'>
+        <div className='space-y-3'>
           <div className='flex justify-between'>
             <span>Subtotal:</span>
             <span>${userTotals.subtotal.toFixed(2)}</span>
           </div>
-          <div className='flex justify-between'>
-            <span>Tax:</span>
-            <span>${userTotals.tax.toFixed(2)}</span>
+
+          <div className='flex items-center justify-between'>
+            <span>Amount Paid:</span>
+            <div className='w-24'>
+              <Input
+                type='number'
+                min='0'
+                step='0.01'
+                value={userTotals.amountPaid.toString()}
+                onChange={handleAmountChange}
+                className='text-right'
+              />
+            </div>
           </div>
-          <div className='flex justify-between'>
-            <span>Tip:</span>
-            <span>${userTotals.tip.toFixed(2)}</span>
-          </div>
-          <div className='flex justify-between font-bold pt-1 border-t'>
-            <span>Your Total:</span>
-            <span className='text-lg text-primary'>
-              ${userTotals.total.toFixed(2)}
+
+          <div className='flex justify-between font-bold pt-2 border-t'>
+            <span>Balance:</span>
+            <span
+              className={`text-lg ${
+                userTotals.balance < 0
+                  ? "text-green-600"
+                  : userTotals.balance > 0
+                  ? "text-red-600"
+                  : "text-primary"
+              }`}
+            >
+              ${userTotals.balance.toFixed(2)}
             </span>
           </div>
         </div>
@@ -95,7 +103,7 @@ export default function BillSummary({
         <Button
           className='w-full'
           onClick={onSettleBill}
-          disabled={userTotals.total === 0}
+          disabled={userTotals.subtotal === 0}
         >
           Settle Your Bill
         </Button>

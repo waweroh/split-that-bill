@@ -12,6 +12,7 @@ interface BillSplitterProps {
 
 export default function BillSplitter({ bill }: BillSplitterProps) {
   const [selectedItemIds, setSelectedItemIds] = useState<number[]>([]);
+  const [amountPaid, setAmountPaid] = useState<number>(0);
   const [message, setMessage] = useState<string>("");
 
   const toggleItemSelection = (itemId: number) => {
@@ -36,18 +37,22 @@ export default function BillSplitter({ bill }: BillSplitterProps) {
       return total + (item ? item.price : 0);
     }, 0);
 
-    // Calculate proportional tax and tip
-    const billSubtotal = bill.items.reduce((sum, item) => sum + item.price, 0);
-    const taxRatio = subtotal / billSubtotal;
-    const proportionalTax = bill.tax * taxRatio;
-    const proportionalTip = bill.tip * taxRatio;
+    // Calculate balance (subtotal - amount paid)
+    const balance = subtotal - amountPaid;
 
     return {
       subtotal,
-      tax: proportionalTax,
-      tip: proportionalTip,
-      total: subtotal + proportionalTax + proportionalTip,
+      amountPaid,
+      balance,
     };
+  };
+
+  const handleAmountPaidChange = (amount: number) => {
+    setAmountPaid(amount);
+    // Clear any existing message when amount paid changes
+    if (message) {
+      setMessage("");
+    }
   };
 
   const handleSettleBill = () => {
@@ -57,15 +62,21 @@ export default function BillSplitter({ bill }: BillSplitterProps) {
       return `${item?.name} ($${item?.price.toFixed(2)})`;
     });
 
-    const newMessage = `
-My portion of the bill from ${bill.restaurant}:
-${selectedItems.join("\n")}
+    const balanceStatus =
+      totals.balance > 0
+        ? "You still owe $" + totals.balance.toFixed(2)
+        : totals.balance < 0
+        ? "You overpaid by $" + Math.abs(totals.balance).toFixed(2)
+        : "Your bill is fully paid";
 
-Subtotal: $${totals.subtotal.toFixed(2)}
-Tax: $${totals.tax.toFixed(2)}
-Tip: $${totals.tip.toFixed(2)}
-Total: $${totals.total.toFixed(2)}
-    `.trim();
+    const newMessage = `My portion of the bill from ${bill.restaurant}:
+      ${selectedItems.join("\n")}
+
+      Subtotal: $${totals.subtotal.toFixed(2)}
+      Amount Paid: $${totals.amountPaid.toFixed(2)}
+      Balance: $${totals.balance.toFixed(2)}
+
+      ${balanceStatus}`.trim();
 
     setMessage(newMessage);
   };
@@ -98,11 +109,13 @@ Total: $${totals.total.toFixed(2)}
         userTotals={calculateUserTotal()}
         onSettleBill={handleSettleBill}
         message={message}
+        onAmountPaidChange={handleAmountPaidChange}
       />
 
       <RunningTotal
         itemCount={selectedItemIds.length}
-        total={calculateUserTotal().total}
+        total={calculateUserTotal().subtotal}
+        balance={calculateUserTotal().balance}
       />
     </div>
   );
