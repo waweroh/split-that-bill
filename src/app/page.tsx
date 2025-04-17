@@ -1,34 +1,45 @@
-import BillSplitter from "@/components/bill-splitter";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function Home() {
-  // Sample bill data - now with individual items instead of quantities
-  const billData = {
-    restaurant: "Pasta Palace",
-    date: "2023-04-07",
-    items: [
-      { id: 1, name: "Margherita Pizza", price: 12.99 },
-      { id: 2, name: "Margherita Pizza", price: 12.99 },
-      { id: 3, name: "Spaghetti Carbonara", price: 14.5 },
-      { id: 4, name: "Spaghetti Carbonara", price: 14.5 },
-      { id: 5, name: "Spaghetti Carbonara", price: 14.5 },
-      { id: 6, name: "Caesar Salad", price: 8.75 },
-      { id: 7, name: "Caesar Salad", price: 8.75 },
-      { id: 8, name: "Garlic Bread", price: 4.5 },
-      { id: 9, name: "Tiramisu", price: 6.99 },
-      { id: 10, name: "Tiramisu", price: 6.99 },
-      { id: 11, name: "Sparkling Water", price: 3.5 },
-      { id: 12, name: "Sparkling Water", price: 3.5 },
-      { id: 13, name: "Sparkling Water", price: 3.5 },
-      { id: 14, name: "Sparkling Water", price: 3.5 },
-    ],
-    tax: 5.25,
-    tip: 15.0,
-  };
-
   return (
-    <main className='min-h-screen p-4 md:p-8 max-w-3xl mx-auto'>
-      <h1 className='text-2xl md:text-3xl font-bold mb-6'>Bill Splitter</h1>
-      <BillSplitter bill={billData} />
+    <main className="min-h-screen p-4 md:p-8 max-w-3xl mx-auto">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">Bill Splitter</h1>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Welcome to Bill Splitter</CardTitle>
+          <CardDescription>
+            The easiest way to split bills with friends and keep track of who owes what.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">With Bill Splitter, you can:</p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Create bills with itemized entries</li>
+            <li>Select which items you're responsible for</li>
+            <li>Track how much you've paid</li>
+            <li>Share bills with friends</li>
+            <li>See your remaining balance</li>
+          </ul>
+        </CardContent>
+        <CardFooter className="flex gap-4">
+          <Button asChild size="lg">
+            <Link href="/bills">View Bills</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/bills/new">Create New Bill</Link>
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <div className="text-sm text-muted-foreground">
+        <p>
+          Note: This application uses Convex for real-time data synchronization. Make sure you have set up your Convex
+          environment correctly.
+        </p>
+      </div>
     </main>
-  );
+  )
 }
